@@ -1,47 +1,7 @@
-from functools import wraps
-from datetime import datetime, timedelta
-
-import jwt
-from flask import Blueprint, jsonify, request, current_app
-from werkzeug.security import generate_password_hash, check_password_hash
-
+from flask import Blueprint, jsonify, request
 from app import mysql
 
 main = Blueprint("main", __name__)
-
-
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth_header = request.headers.get("Authorization")
-
-        if not auth_header:
-            return jsonify({"error": "Token is missing"}), 401
-
-        try:
-            parts = auth_header.split(" ")
-
-            if len(parts) != 2 or parts[0] != "Bearer":
-                return jsonify({"error": "Invalid token format"}), 401
-
-            token = parts[1]
-
-            payload = jwt.decode(
-                token,
-                current_app.config["JWT_SECRET"],
-                algorithms=["HS256"]
-            )
-
-        except jwt.ExpiredSignatureError:
-            return jsonify({"error": "Token has expired"}), 401
-
-        except jwt.InvalidTokenError:
-            return jsonify({"error": "Invalid token"}), 401
-
-        return f(payload, *args, **kwargs)
-
-    return decorated
-
 
 @main.route("/health", methods=["GET"])
 def health():
@@ -49,100 +9,6 @@ def health():
         "status": "ok",
         "system": "CreamJoy API",
         "version": "1.0"
-    })
-
-
-@main.route("/api/auth/register", methods=["POST"])
-def register():
-    data = request.get_json()
-
-    name = data.get("name")
-    email = data.get("email")
-    password = data.get("password")
-    role = data.get("role")
-
-    if not name or not email or not password or not role:
-        return jsonify({"error": "name, email, password and role are required"}), 400
-
-    password_hash = generate_password_hash(password)
-
-    cur = mysql.connection.cursor()
-
-    try:
-        cur.execute("""
-            INSERT INTO staff (name, email, password_hash, role)
-            VALUES (%s, %s, %s, %s)
-        """, (name, email, password_hash, role))
-
-        mysql.connection.commit()
-
-    except Exception as e:
-        mysql.connection.rollback()
-        cur.close()
-        return jsonify({"error": str(e)}), 400
-
-    cur.close()
-
-    return jsonify({"message": "Staff registered successfully"}), 201
-
-
-@main.route("/api/auth/login", methods=["POST"])
-def login():
-    data = request.get_json()
-
-    email = data.get("email")
-    password = data.get("password")
-
-    if not email or not password:
-        return jsonify({"error": "email and password are required"}), 400
-
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        SELECT staff_id, name, email, password_hash, role
-        FROM staff
-        WHERE email = %s
-    """, (email,))
-
-    staff = cur.fetchone()
-    cur.close()
-
-    if not staff:
-        return jsonify({"error": "Invalid email or password"}), 401
-
-    staff_id = staff[0]
-    name = staff[1]
-    saved_password_hash = staff[3]
-    role = staff[4]
-
-    if not check_password_hash(saved_password_hash, password):
-        return jsonify({"error": "Invalid email or password"}), 401
-
-    payload = {
-        "staff_id": staff_id,
-        "name": name,
-        "role": role,
-        "exp": datetime.utcnow() + timedelta(hours=24)
-    }
-
-    token = jwt.encode(
-        payload,
-        current_app.config["JWT_SECRET"],
-        algorithm="HS256"
-    )
-
-    return jsonify({
-        "message": "Login successful",
-        "token": token
-    })
-
-
-@main.route("/api/auth/me", methods=["GET"])
-@token_required
-def auth_me(current_staff):
-    return jsonify({
-        "staff_id": current_staff["staff_id"],
-        "name": current_staff["name"],
-        "role": current_staff["role"]
     })
 
 
@@ -170,8 +36,7 @@ def products():
 
 
 @main.route("/api/batches", methods=["GET"])
-@token_required
-def get_batches(current_staff):
+def get_batches():
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT 
@@ -202,8 +67,7 @@ def get_batches(current_staff):
 
 
 @main.route("/api/batches/<int:batch_id>", methods=["GET"])
-@token_required
-def get_batch(current_staff, batch_id):
+def get_batch(batch_id):
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT 
@@ -245,11 +109,7 @@ def get_batch(current_staff, batch_id):
 
 
 @main.route("/api/batches", methods=["POST"])
-@token_required
-def create_batch(current_staff):
-    if current_staff["role"] not in ["production", "supervisor"]:
-        return jsonify({"error": "Forbidden: only production or supervisor staff can create batches"}), 403
-
+def create_batch():
     data = request.get_json()
 
     batch_number = data.get("batch_number")
@@ -281,8 +141,7 @@ def create_batch(current_staff):
 
 
 @main.route("/api/batches/<int:batch_id>/status", methods=["PUT"])
-@token_required
-def update_batch_status(current_staff, batch_id):
+def update_batch_status(batch_id):
     data = request.get_json()
     status = data.get("status")
 
@@ -302,8 +161,7 @@ def update_batch_status(current_staff, batch_id):
 
 
 @main.route("/api/inventory", methods=["GET"])
-@token_required
-def get_inventory(current_staff):
+def get_inventory():
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT material_id, material_name, current_stock, minimum_stock
@@ -330,8 +188,7 @@ def get_inventory(current_staff):
 
 
 @main.route("/api/inventory/<int:material_id>", methods=["PUT"])
-@token_required
-def update_inventory(current_staff, material_id):
+def update_inventory(material_id):
     data = request.get_json()
     current_stock = data.get("current_stock")
 
@@ -348,8 +205,7 @@ def update_inventory(current_staff, material_id):
 
 
 @main.route("/api/orders", methods=["GET"])
-@token_required
-def get_orders(current_staff):
+def get_orders():
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT 
@@ -381,8 +237,7 @@ def get_orders(current_staff):
 
 
 @main.route("/api/orders", methods=["POST"])
-@token_required
-def create_order(current_staff):
+def create_order():
     data = request.get_json()
 
     customer_id = data.get("customer_id")
@@ -437,8 +292,7 @@ def create_order(current_staff):
 
 
 @main.route("/api/orders/<int:order_id>/status", methods=["PUT"])
-@token_required
-def update_order_status(current_staff, order_id):
+def update_order_status(order_id):
     data = request.get_json()
     status = data.get("status")
 
