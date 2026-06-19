@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreamJoy Staff Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>CreamJoy</h2>
+      <nav>
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Batches</a>
+        <a href="#">Products</a>
+        <a href="#">Orders</a>
+        <a href="#">Inventory</a>
+        <a href="#">Deliveries</a>
+        <a href="#">Credit Accounts</a>
+        <a href="#">Expenditure</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-header">
+        <h1>CreamJoy Yoghurt</h1>
+        <p>Today: 17 June 2026</p>
+        <div class="staff-badge">
+          <span>Jack</span>
+          <strong>Delivery</strong>
+        </div>
+      </header>
+
+      <section class="metrics">
+        <div class="card"><h3>Today's Batches</h3><p>4</p></div>
+        <div class="card"><h3>Pending Deliveries</h3><p>8</p></div>
+        <div class="card"><h3>Low Stock Alerts</h3><p>3</p></div>
+        <div class="card"><h3>Credit Outstanding</h3><p>UGX 540,000</p></div>
+      </section>
+
+      <section class="table-section">
+        <div class="section-header">
+          <h2>Live Batches</h2>
+          <button id="showBatchFormBtn">Record New Batch</button>
+        </div>
+
+        <form id="batchForm" class="hidden">
+          <input type="date" id="batchDate" required>
+          <input type="text" id="batchNumber" placeholder="Batch Number" required>
+
+          <select id="flavour" required>
+            <option value="">Select flavour</option>
+            <option>Millet</option>
+            <option>Vanilla</option>
+            <option>Chocolate</option>
+            <option>Strawberry</option>
+            <option>Mango</option>
+            <option>Plain</option>
+            <option>Blueberry</option>
+            <option>Mixed</option>
+          </select>
+
+          <select id="size" required>
+            <option value="">Select size</option>
+            <option>300ml</option>
+            <option>1L</option>
+            <option>2L</option>
+            <option>5L</option>
+          </select>
+
+          <input type="number" id="quantity" placeholder="Quantity" required>
+
+          <select id="staffSelect">
+            <option value="1">Jack</option>
+            <option value="2">Olivia</option>
+            <option value="3">Florence</option>
+          </select>
+
+          <button type="submit">Save Batch</button>
+        </form>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Batch Number</th>
+              <th>Date</th>
+              <th>Flavours Produced</th>
+              <th>Total Units</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="batchesTableBody"></tbody>
+        </table>
+      </section>
+
+      <section class="table-section">
+        <h2>Orders</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>Products Ordered</th>
+              <th>Amount UGX</th>
+              <th>Payment Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
