@@ -117,3 +117,33 @@ window.onload = () => {
   loadBatches();
   loadOrders();
 };
+document.getElementById("expenditureDate").valueAsDate = new Date();
+
+document.getElementById("expenditureForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const data = {
+    date: document.getElementById("expenditureDate").value,
+    category: document.getElementById("expenditureCategory").value,
+    description: document.getElementById("expenditureDescription").value,
+    quantity: Number(document.getElementById("expenditureQuantity").value),
+    unit: document.getElementById("expenditureUnit").value,
+    amount: Number(document.getElementById("expenditureAmount").value),
+    paid_by: Number(document.getElementById("expenditurePaidBy").value),
+    notes: document.getElementById("expenditureNotes").value
+  };
+
+  const response = await apiFetch(`${API_URL}/api/expenditures`, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
+  if (response.ok) {
+    alert("Expenditure recorded successfully");
+    document.getElementById("expenditureForm").reset();
+    document.getElementById("expenditureDate").valueAsDate = new Date();
+  } else {
+    const error = await response.json();
+    alert(error.error || "Failed to record expenditure");
+  }
+});

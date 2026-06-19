@@ -455,3 +455,28 @@ def update_order_status(current_staff, order_id):
     cur.close()
 
     return jsonify({"message": "Order status updated"})
+@main.route("/api/expenditures", methods=["POST"])
+@token_required
+def create_expenditure(current_staff):
+    data = request.get_json()
+
+    expenditure_date = data.get("date")
+    category = data.get("category")
+    description = data.get("description")
+    quantity = data.get("quantity")
+    unit = data.get("unit")
+    amount = data.get("amount")
+    paid_by = data.get("paid_by")
+    notes = data.get("notes")
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        INSERT INTO expenditures
+        (expenditure_date, item_name, category, amount, notes)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (expenditure_date, description, category, amount, notes))
+
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({"message": "Expenditure recorded successfully"}), 201

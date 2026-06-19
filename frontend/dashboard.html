@@ -109,6 +109,50 @@
           <tbody id="ordersTableBody"></tbody>
         </table>
       </section>
+<section class="table-section">
+  <h2>Record Expenditure</h2>
+
+  <form id="expenditureForm">
+    <input type="date" id="expenditureDate" required>
+
+    <select id="expenditureCategory" required>
+      <option value="">Select Category</option>
+      <option>Milk</option>
+      <option>Milk Powder</option>
+      <option>Sugar</option>
+      <option>Starch</option>
+      <option>Bushela</option>
+      <option>Stabilizer</option>
+      <option>Culture</option>
+      <option>Matapolo</option>
+      <option>Vanilla Essence</option>
+      <option>Bottles 1L</option>
+      <option>Bottles 300ml</option>
+      <option>Stickers</option>
+      <option>Tencan</option>
+      <option>Transport</option>
+      <option>Uniform Washing</option>
+      <option>Allowance</option>
+      <option>Ice</option>
+      <option>Other</option>
+    </select>
+
+    <input type="text" id="expenditureDescription" placeholder="Description" required>
+    <input type="number" id="expenditureQuantity" placeholder="Quantity" required>
+    <input type="text" id="expenditureUnit" placeholder="Unit e.g. kg, litres, dozens" required>
+    <input type="number" id="expenditureAmount" placeholder="Amount UGX" required>
+
+    <select id="expenditurePaidBy" required>
+      <option value="1">Jack</option>
+      <option value="2">Olivia</option>
+      <option value="3">Florence</option>
+    </select>
+
+    <textarea id="expenditureNotes" placeholder="Notes"></textarea>
+
+    <button type="submit">Save Expenditure</button>
+  </form>
+</section>
     </main>
   </div>
 
